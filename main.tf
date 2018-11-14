@@ -22,6 +22,23 @@
  * ```
  */
 
+resource "aws_wafregional_ipset" "ips" {
+  name = "waf-app-${var.environment}-ips"
+}
+
+resource "aws_wafregional_rule" "ips" {
+  depends_on = ["aws_wafregional_ipset.ips"]
+
+  name        = "waf-app-${var.environment}-ips"
+  metric_name = "wafApp${title(var.environment)}IPs"
+
+  predicate {
+    data_id = "${aws_wafregional_ipset.ips.id}"
+    negated = false
+    type    = "IPMatch"
+  }
+}
+
 resource "aws_wafregional_regex_pattern_set" "regex_uri" {
   name                  = "waf-app-${var.environment}-regex-uri"
   regex_pattern_strings = "${var.regex_disallow_pattern_strings}"
@@ -77,6 +94,16 @@ resource "aws_wafregional_web_acl" "wafacl" {
     type     = "REGULAR"
     rule_id  = "${aws_wafregional_rule.regex_uri.id}"
     priority = 2
+
+    action {
+      type = "BLOCK"
+    }
+  }
+
+  rule {
+    type     = "REGULAR"
+    rule_id  = "${aws_wafregional_rule.ips.id}"
+    priority = 3
 
     action {
       type = "BLOCK"

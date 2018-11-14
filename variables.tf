@@ -17,3 +17,9 @@ variable "regex_disallow_pattern_strings" {
   description = "The list of URI patterns to block using the WAF."
   type        = "list"
 }
+
+variable "ips_disallow" {
+  description = "The list of IP addresses to block using the WAF."
+  type        = "list"
+  default     = []
+}
