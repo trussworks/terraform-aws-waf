@@ -17,7 +17,8 @@
  *   environment                    = "${var.environment}"
  *   alb_arn                        = "${module.alb_web_containers.alb_arn}"
  *   wafregional_rule_f5_id         = "${var.wafregional_rule_id}"
- *   regex_disallow_pattern_strings = "${var.waf_regex_disallow_pattern_strings}"
+ *   regex_path_disallow_pattern_strings = "${var.waf_regex_disallow_pattern_strings}"
+ *   regex_host_disallow_pattern_strings = "${var.waf_regex_disallow_pattern_strings}"
  * }
  * ```
  */
@@ -41,7 +42,7 @@ resource "aws_wafregional_rule" "ips" {
 
 resource "aws_wafregional_regex_pattern_set" "regex_uri" {
   name                  = "waf-app-${var.environment}-regex-uri"
-  regex_pattern_strings = "${var.regex_disallow_pattern_strings}"
+  regex_pattern_strings = "${var.regex_path_disallow_pattern_strings}"
 }
 
 resource "aws_wafregional_regex_match_set" "regex_uri" {
@@ -69,6 +70,40 @@ resource "aws_wafregional_rule" "regex_uri" {
     type    = "RegexMatch"
     data_id = "${aws_wafregional_regex_match_set.regex_uri.id}"
     negated = false
+  }
+}
+
+resource "aws_wafregional_regex_pattern_set" "regex_host" {
+  name                  = "waf-app-${var.environment}-regex-host"
+  regex_pattern_strings = "${var.regex_host_allow_pattern_strings}"
+}
+
+resource "aws_wafregional_regex_match_set" "regex_host" {
+  name = "waf-app-${var.environment}-regex-host"
+
+  regex_match_tuple {
+    field_to_match {
+      type = "HEADER"
+      data = "Host"
+    }
+
+    regex_pattern_set_id = "${aws_wafregional_regex_pattern_set.regex_host.id}"
+
+    # Use COMPRESS_WHITE_SPACE to prevent sneaking around regex filter with
+    # extra or non-standard whitespace
+    # See https://docs.aws.amazon.com/sdk-for-go/api/service/waf/#RegexMatchTuple
+    text_transformation = "COMPRESS_WHITE_SPACE"
+  }
+}
+
+resource "aws_wafregional_rule" "regex_host" {
+  name        = "waf-app-${var.environment}-regex-host"
+  metric_name = "wafApp${title(var.environment)}RegexHost"
+
+  predicate {
+    type    = "RegexMatch"
+    data_id = "${aws_wafregional_regex_match_set.regex_host.id}"
+    negated = true
   }
 }
 
@@ -104,6 +139,16 @@ resource "aws_wafregional_web_acl" "wafacl" {
     type     = "REGULAR"
     rule_id  = "${aws_wafregional_rule.ips.id}"
     priority = 3
+
+    action {
+      type = "BLOCK"
+    }
+  }
+
+  rule {
+    type     = "REGULAR"
+    rule_id  = "${aws_wafregional_rule.regex_host.id}"
+    priority = 4
 
     action {
       type = "BLOCK"

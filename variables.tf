@@ -13,8 +13,13 @@ variable "wafregional_rule_f5_id" {
   type        = "string"
 }
 
-variable "regex_disallow_pattern_strings" {
-  description = "The list of URI patterns to block using the WAF."
+variable "regex_path_disallow_pattern_strings" {
+  description = "The list of URI paths to block using the WAF."
+  type        = "list"
+}
+
+variable "regex_host_allow_pattern_strings" {
+  description = "The list of hosts to allow using the WAF (as found in HTTP Header)."
   type        = "list"
 }
 
