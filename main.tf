@@ -17,7 +17,8 @@
  * module "waf" {
  *   source = "trussworks/waf/aws"
  *
- *   environment                          = "${var.environment}"
+ *   environment                         = "${var.environment}"
+ *   associate_alb                       = true
  *   alb_arn                             = "${module.alb_web_containers.alb_arn}"
  *   wafregional_rule_f5_id              = "${var.wafregional_rule_id}"
  *   ips_disallow                        = "${var.waf_ips_diallow}"
