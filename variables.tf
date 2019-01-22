@@ -3,13 +3,19 @@ variable "environment" {
   type        = "string"
 }
 
+variable "associate_alb" {
+  description = "Whether to associate an Application Load Balancer (ALB) with an Web Application Firewall (WAF) Access Control List (ACL)."
+  default     = false
+  type        = "string"
+}
+
 variable "alb_arn" {
-  description = "Application Load Balancer ARN"
+  description = "ARN of the Application Load Balancer (ALB) to be associated with the Web Application Firewall (WAF) Access Control List (ACL)."
   type        = "string"
 }
 
 variable "wafregional_rule_f5_id" {
-  description = "The ID of the F5 Rule Group to use for the WAF for the ALB.  Find the id with \"aws waf-regional list-subscribed-rule-groups\""
+  description = "The ID of the F5 Rule Group to use for the WAF for the ALB.  Find the id with \"aws waf-regional list-subscribed-rule-groups\"."
   type        = "string"
 }
 

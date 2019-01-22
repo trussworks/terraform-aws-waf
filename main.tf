@@ -4,7 +4,10 @@
  * Creates the following resources:
  *
  * * Web Application Firewall (WAF)
- * * Creates URI Regex Rule for WAF
+ * * Links F5-managed OWASP rules for WAF to block common attacks
+ * * Creates rule for WAF to block requests by source IP Address
+ * * Creates rule for WAF to block requests by path (as found in URI)
+ * * Creates rule for WAF to allow requests by host (as found in HTTP Header)
  * * Attaches WAF to Application Load Balancer (ALB)
  *
 
@@ -12,13 +15,14 @@
  *
  * ```hcl
  * module "waf" {
- *   source = "./waf"
+ *   source = "trussworks/waf/aws"
  *
- *   environment                    = "${var.environment}"
- *   alb_arn                        = "${module.alb_web_containers.alb_arn}"
- *   wafregional_rule_f5_id         = "${var.wafregional_rule_id}"
- *   regex_path_disallow_pattern_strings = "${var.waf_regex_disallow_pattern_strings}"
- *   regex_host_disallow_pattern_strings = "${var.waf_regex_disallow_pattern_strings}"
+ *   environment                          = "${var.environment}"
+ *   alb_arn                             = "${module.alb_web_containers.alb_arn}"
+ *   wafregional_rule_f5_id              = "${var.wafregional_rule_id}"
+ *   ips_disallow                        = "${var.waf_ips_diallow}"
+ *   regex_path_disallow_pattern_strings = "${var.waf_regex_path_disallow_pattern_strings}"
+ *   regex_host_allow_pattern_strings    = "${var.waf_regex_host_allow_pattern_strings}"
  * }
  * ```
  */
@@ -157,6 +161,7 @@ resource "aws_wafregional_web_acl" "wafacl" {
 }
 
 resource "aws_wafregional_web_acl_association" "main" {
+  count        = "${var.associate_alb}"
   resource_arn = "${var.alb_arn}"
   web_acl_id   = "${aws_wafregional_web_acl.wafacl.id}"
 }
