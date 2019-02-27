@@ -24,6 +24,7 @@
  *   ips_disallow                        = "${var.waf_ips_diallow}"
  *   regex_path_disallow_pattern_strings = "${var.waf_regex_path_disallow_pattern_strings}"
  *   regex_host_allow_pattern_strings    = "${var.waf_regex_host_allow_pattern_strings}"
+ *   ip_rate_limit                       = 2000
  * }
  * ```
  */
@@ -43,6 +44,14 @@ resource "aws_wafregional_rule" "ips" {
     negated = false
     type    = "IPMatch"
   }
+}
+
+resource "aws_wafregional_rate_based_rule" "ipratelimit" {
+  name        = "waf-app-${var.environment}-ipratelimit"
+  metric_name = "wafApp${title(var.environment)}IpRateLimit"
+
+  rate_key   = "IP"
+  rate_limit = "${var.ip_rate_limit}"
 }
 
 resource "aws_wafregional_regex_pattern_set" "regex_uri" {
@@ -154,6 +163,16 @@ resource "aws_wafregional_web_acl" "wafacl" {
     type     = "REGULAR"
     rule_id  = "${aws_wafregional_rule.regex_host.id}"
     priority = 4
+
+    action {
+      type = "BLOCK"
+    }
+  }
+
+  rule {
+    type     = "RATE_BASED"
+    rule_id  = "${aws_wafregional_rate_based_rule.ipratelimit.id}"
+    priority = 5
 
     action {
       type = "BLOCK"
