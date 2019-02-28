@@ -34,3 +34,9 @@ variable "ips_disallow" {
   type        = "list"
   default     = []
 }
+
+variable "ip_rate_limit" {
+  description = "The rate limit for IPs matching with a 5 minute window."
+  type        = "string"
+  default     = 2000
+}
