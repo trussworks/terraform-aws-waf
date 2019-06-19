@@ -34,13 +34,13 @@ resource "aws_wafregional_ipset" "ips" {
 }
 
 resource "aws_wafregional_rule" "ips" {
-  depends_on = ["aws_wafregional_ipset.ips"]
+  depends_on = [aws_wafregional_ipset.ips]
 
   name        = "waf-app-${var.environment}-ips"
   metric_name = "wafApp${title(var.environment)}IPs"
 
   predicate {
-    data_id = "${aws_wafregional_ipset.ips.id}"
+    data_id = aws_wafregional_ipset.ips.id
     negated = false
     type    = "IPMatch"
   }
@@ -51,12 +51,12 @@ resource "aws_wafregional_rate_based_rule" "ipratelimit" {
   metric_name = "wafApp${title(var.environment)}IpRateLimit"
 
   rate_key   = "IP"
-  rate_limit = "${var.ip_rate_limit}"
+  rate_limit = var.ip_rate_limit
 }
 
 resource "aws_wafregional_regex_pattern_set" "regex_uri" {
   name                  = "waf-app-${var.environment}-regex-uri"
-  regex_pattern_strings = "${var.regex_path_disallow_pattern_strings}"
+  regex_pattern_strings = var.regex_path_disallow_pattern_strings
 }
 
 resource "aws_wafregional_regex_match_set" "regex_uri" {
@@ -67,7 +67,7 @@ resource "aws_wafregional_regex_match_set" "regex_uri" {
       type = "URI"
     }
 
-    regex_pattern_set_id = "${aws_wafregional_regex_pattern_set.regex_uri.id}"
+    regex_pattern_set_id = aws_wafregional_regex_pattern_set.regex_uri.id
 
     # Use COMPRESS_WHITE_SPACE to prevent sneaking around regex filter with
     # extra or non-standard whitespace
@@ -82,14 +82,14 @@ resource "aws_wafregional_rule" "regex_uri" {
 
   predicate {
     type    = "RegexMatch"
-    data_id = "${aws_wafregional_regex_match_set.regex_uri.id}"
+    data_id = aws_wafregional_regex_match_set.regex_uri.id
     negated = false
   }
 }
 
 resource "aws_wafregional_regex_pattern_set" "regex_host" {
   name                  = "waf-app-${var.environment}-regex-host"
-  regex_pattern_strings = "${var.regex_host_allow_pattern_strings}"
+  regex_pattern_strings = var.regex_host_allow_pattern_strings
 }
 
 resource "aws_wafregional_regex_match_set" "regex_host" {
@@ -101,7 +101,7 @@ resource "aws_wafregional_regex_match_set" "regex_host" {
       data = "Host"
     }
 
-    regex_pattern_set_id = "${aws_wafregional_regex_pattern_set.regex_host.id}"
+    regex_pattern_set_id = aws_wafregional_regex_pattern_set.regex_host.id
 
     # Use COMPRESS_WHITE_SPACE to prevent sneaking around regex filter with
     # extra or non-standard whitespace
@@ -116,7 +116,7 @@ resource "aws_wafregional_rule" "regex_host" {
 
   predicate {
     type    = "RegexMatch"
-    data_id = "${aws_wafregional_regex_match_set.regex_host.id}"
+    data_id = aws_wafregional_regex_match_set.regex_host.id
     negated = true
   }
 }
@@ -131,7 +131,7 @@ resource "aws_wafregional_web_acl" "wafacl" {
 
   rule {
     type     = "GROUP"
-    rule_id  = "${var.wafregional_rule_f5_id}"
+    rule_id  = var.wafregional_rule_f5_id
     priority = 1
 
     override_action {
@@ -141,7 +141,7 @@ resource "aws_wafregional_web_acl" "wafacl" {
 
   rule {
     type     = "REGULAR"
-    rule_id  = "${aws_wafregional_rule.regex_uri.id}"
+    rule_id  = aws_wafregional_rule.regex_uri.id
     priority = 2
 
     action {
@@ -151,7 +151,7 @@ resource "aws_wafregional_web_acl" "wafacl" {
 
   rule {
     type     = "REGULAR"
-    rule_id  = "${aws_wafregional_rule.ips.id}"
+    rule_id  = aws_wafregional_rule.ips.id
     priority = 3
 
     action {
@@ -161,7 +161,7 @@ resource "aws_wafregional_web_acl" "wafacl" {
 
   rule {
     type     = "REGULAR"
-    rule_id  = "${aws_wafregional_rule.regex_host.id}"
+    rule_id  = aws_wafregional_rule.regex_host.id
     priority = 4
 
     action {
@@ -171,7 +171,7 @@ resource "aws_wafregional_web_acl" "wafacl" {
 
   rule {
     type     = "RATE_BASED"
-    rule_id  = "${aws_wafregional_rate_based_rule.ipratelimit.id}"
+    rule_id  = aws_wafregional_rate_based_rule.ipratelimit.id
     priority = 5
 
     action {
@@ -181,7 +181,8 @@ resource "aws_wafregional_web_acl" "wafacl" {
 }
 
 resource "aws_wafregional_web_acl_association" "main" {
-  count        = "${var.associate_alb}"
-  resource_arn = "${var.alb_arn}"
-  web_acl_id   = "${aws_wafregional_web_acl.wafacl.id}"
+  count        = var.associate_alb
+  resource_arn = var.alb_arn
+  web_acl_id   = aws_wafregional_web_acl.wafacl.id
 }
+
