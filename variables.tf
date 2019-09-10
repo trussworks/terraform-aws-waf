@@ -29,12 +29,6 @@ variable "regex_host_allow_pattern_strings" {
   type        = "list"
 }
 
-variable "ips_disallow" {
-  description = "The list of IP addresses to block using the WAF."
-  type        = "list"
-  default     = []
-}
-
 variable "ip_rate_limit" {
   description = "The rate limit for IPs matching with a 5 minute window."
   type        = "string"

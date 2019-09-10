@@ -5,7 +5,7 @@
  *
  * * Web Application Firewall (WAF)
  * * Links F5-managed OWASP rules for WAF to block common attacks
- * * Creates rule for WAF to block requests by source IP Address
+ * * Creates rule for WAF to block requests by source IP Address (**Note**: the list of blocked IPs are not managed by this module)
  * * Creates rule for WAF to block requests by path (as found in URI)
  * * Creates rule for WAF to allow requests by host (as found in HTTP Header)
  * * Attaches WAF to Application Load Balancer (ALB)
