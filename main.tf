@@ -30,8 +30,6 @@
  */
 
 resource "aws_wafregional_rule" "ips" {
-  depends_on = ["aws_wafregional_ipset.ips"]
-
   name        = "waf-app-${var.environment}-ips"
   metric_name = "wafApp${title(var.environment)}IPs"
 
