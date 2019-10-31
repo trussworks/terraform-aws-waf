@@ -29,16 +29,6 @@
  * ```
  */
 
-resource "aws_wafregional_ipset" "ips" {
-  name = "waf-app-${var.environment}-ips"
-
-  lifecycle {
-    ignore_changes = [
-      "ip_set_descriptor",
-    ]
-  }
-}
-
 resource "aws_wafregional_rule" "ips" {
   depends_on = ["aws_wafregional_ipset.ips"]
 
@@ -46,7 +36,7 @@ resource "aws_wafregional_rule" "ips" {
   metric_name = "wafApp${title(var.environment)}IPs"
 
   predicate {
-    data_id = "${aws_wafregional_ipset.ips.id}"
+    data_id = "${var.ip_set}"
     negated = false
     type    = "IPMatch"
   }

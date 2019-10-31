@@ -34,3 +34,8 @@ variable "ip_rate_limit" {
   type        = "string"
   default     = 2000
 }
+
+variable "ip_set" {
+  description = "ID of IP set of IP addresses to block."
+  type        = "string"
+}
