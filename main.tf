@@ -19,42 +19,50 @@
  *
  *   alb_arn                             = "${module.alb_web_containers.alb_arn}"
  *   associate_alb                       = true
- *   environment                         = "${var.environment}"
+ *   ip_rate_limit                       = 2000
+ *   ip_sets                             = "${var.ip_sets}"
  *   regex_host_allow_pattern_strings    = "${var.waf_regex_host_allow_pattern_strings}"
  *   regex_path_disallow_pattern_strings = "${var.waf_regex_path_disallow_pattern_strings}"
- *   ip_rate_limit                       = 2000
- *   ip_set                              = "${aws_wafregional_ipset.global.id}"
  *   wafregional_rule_f5_id              = "${var.wafregional_rule_id}"
+ ule_id
+ *   web_acl_metric_name                 = "wafAppHelloWorld"
+ *   web_acl_name                        = "app-hello-world"
  * }
  * ```
  */
 
 resource "aws_wafregional_rule" "ips" {
-  name        = "waf-app-${var.environment}-ips"
-  metric_name = "wafApp${title(var.environment)}IPs"
+  count = length(var.ip_sets)
+
+  name        = format("%s-ips-%d", var.web_acl_name, count.index)
+  metric_name = format("%sIPs%d", var.web_acl_metric_name, count.index)
 
   predicate {
-    data_id = "${var.ip_set}"
+    data_id = var.ip_sets[count.index]
     negated = false
     type    = "IPMatch"
+  }
+
+  lifecycle {
+    create_before_destroy = true
   }
 }
 
 resource "aws_wafregional_rate_based_rule" "ipratelimit" {
-  name        = "waf-app-${var.environment}-ipratelimit"
-  metric_name = "wafApp${title(var.environment)}IpRateLimit"
+  name        = format("%s-ip-rate-limit", var.web_acl_name)
+  metric_name = format("%sIpRateLimit", var.web_acl_metric_name)
 
   rate_key   = "IP"
   rate_limit = "${var.ip_rate_limit}"
 }
 
 resource "aws_wafregional_regex_pattern_set" "regex_uri" {
-  name                  = "waf-app-${var.environment}-regex-uri"
+  name                  = format("%s-regex-uri", var.web_acl_name)
   regex_pattern_strings = "${var.regex_path_disallow_pattern_strings}"
 }
 
 resource "aws_wafregional_regex_match_set" "regex_uri" {
-  name = "waf-app-${var.environment}-regex-uri"
+  name = format("%s-regex-uri", var.web_acl_name)
 
   regex_match_tuple {
     field_to_match {
@@ -71,8 +79,8 @@ resource "aws_wafregional_regex_match_set" "regex_uri" {
 }
 
 resource "aws_wafregional_rule" "regex_uri" {
-  name        = "waf-app-${var.environment}-regex-uri"
-  metric_name = "wafApp${title(var.environment)}RegexUri"
+  name        = format("%s-regex-uri", var.web_acl_name)
+  metric_name = format("%sRegexUri", var.web_acl_metric_name)
 
   predicate {
     type    = "RegexMatch"
@@ -82,12 +90,12 @@ resource "aws_wafregional_rule" "regex_uri" {
 }
 
 resource "aws_wafregional_regex_pattern_set" "regex_host" {
-  name                  = "waf-app-${var.environment}-regex-host"
+  name                  = format("waf-%s-regex-host", var.web_acl_name)
   regex_pattern_strings = "${var.regex_host_allow_pattern_strings}"
 }
 
 resource "aws_wafregional_regex_match_set" "regex_host" {
-  name = "waf-app-${var.environment}-regex-host"
+  name = format("waf-%s-regex-host", var.web_acl_name)
 
   regex_match_tuple {
     field_to_match {
@@ -105,8 +113,8 @@ resource "aws_wafregional_regex_match_set" "regex_host" {
 }
 
 resource "aws_wafregional_rule" "regex_host" {
-  name        = "waf-app-${var.environment}-regex-host"
-  metric_name = "wafApp${title(var.environment)}RegexHost"
+  name        = format("%s-regex-host", var.web_acl_name)
+  metric_name = format("%sRegexHost", var.web_acl_metric_name)
 
   predicate {
     type    = "RegexMatch"
@@ -116,66 +124,77 @@ resource "aws_wafregional_rule" "regex_host" {
 }
 
 resource "aws_wafregional_web_acl" "wafacl" {
-  name        = "waf-app-${var.environment}"
-  metric_name = "wafApp${title(var.environment)}"
+  name        = var.web_acl_name
+  metric_name = var.web_acl_metric_name
 
   default_action {
     type = "ALLOW"
   }
 
-  rule {
-    type     = "GROUP"
-    rule_id  = "${var.wafregional_rule_f5_id}"
-    priority = 1
+  dynamic "rule" {
+    for_each = aws_wafregional_rule.ips.*.id
+    content {
+      type     = "REGULAR"
+      rule_id  = rule.value
+      priority = 1 + rule.key
 
-    override_action {
-      type = "NONE"
-    }
-  }
-
-  rule {
-    type     = "REGULAR"
-    rule_id  = "${aws_wafregional_rule.regex_uri.id}"
-    priority = 2
-
-    action {
-      type = "BLOCK"
-    }
-  }
-
-  rule {
-    type     = "REGULAR"
-    rule_id  = "${aws_wafregional_rule.ips.id}"
-    priority = 3
-
-    action {
-      type = "BLOCK"
-    }
-  }
-
-  rule {
-    type     = "REGULAR"
-    rule_id  = "${aws_wafregional_rule.regex_host.id}"
-    priority = 4
-
-    action {
-      type = "BLOCK"
+      action {
+        type = "BLOCK"
+      }
     }
   }
 
   rule {
     type     = "RATE_BASED"
-    rule_id  = "${aws_wafregional_rate_based_rule.ipratelimit.id}"
-    priority = 5
+    rule_id  = aws_wafregional_rate_based_rule.ipratelimit.id
+    priority = 1 + length(aws_wafregional_rule.ips.*.id)
 
     action {
       type = "BLOCK"
     }
   }
+
+  dynamic "rule" {
+    for_each = length(var.wafregional_rule_f5_id) > 0 ? list(var.wafregional_rule_f5_id) : []
+    content {
+      type     = "GROUP"
+      rule_id  = rule.value
+      priority = 1 + length(aws_wafregional_rule.ips.*.id) + 1 + rule.key
+
+      override_action {
+        type = "NONE"
+      }
+    }
+  }
+
+  rule {
+    type     = "REGULAR"
+    rule_id  = aws_wafregional_rule.regex_uri.id
+    priority = 1 + length(aws_wafregional_rule.ips.*.id) + 1 + (length(var.wafregional_rule_f5_id) > 0 ? 1 : 0)
+
+    action {
+      type = "BLOCK"
+    }
+  }
+
+  rule {
+    type     = "REGULAR"
+    rule_id  = aws_wafregional_rule.regex_host.id
+    priority = 1 + length(aws_wafregional_rule.ips.*.id) + 1 + (length(var.wafregional_rule_f5_id) > 0 ? 1 : 0) + 1
+
+    action {
+      type = "BLOCK"
+    }
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
 }
 
 resource "aws_wafregional_web_acl_association" "main" {
-  count        = "${var.associate_alb}"
+  count        = var.associate_alb > 0 ? 1 : 0
   resource_arn = "${var.alb_arn}"
   web_acl_id   = "${aws_wafregional_web_acl.wafacl.id}"
 }
