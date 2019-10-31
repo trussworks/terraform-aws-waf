@@ -16,14 +16,14 @@ Creates the following resources:
 module "waf" {
   source = "trussworks/waf/aws"
 
-  environment                         = "${var.environment}"
-  associate_alb                       = true
   alb_arn                             = "${module.alb_web_containers.alb_arn}"
-  wafregional_rule_f5_id              = "${var.wafregional_rule_id}"
-  ips_disallow                        = "${var.waf_ips_diallow}"
-  regex_path_disallow_pattern_strings = "${var.waf_regex_path_disallow_pattern_strings}"
+  associate_alb                       = true
+  environment                         = "${var.environment}"
   regex_host_allow_pattern_strings    = "${var.waf_regex_host_allow_pattern_strings}"
+  regex_path_disallow_pattern_strings = "${var.waf_regex_path_disallow_pattern_strings}"
   ip_rate_limit                       = 2000
+  ip_set                              = "${aws_wafregional_ipset.global.id}"
+  wafregional_rule_f5_id              = "${var.wafregional_rule_id}"
 }
 ```
 
@@ -35,7 +35,7 @@ module "waf" {
 | associate\_alb | Whether to associate an Application Load Balancer (ALB) with an Web Application Firewall (WAF) Access Control List (ACL). | string | `"false"` | no |
 | environment | Name of the environment to create (e.g., staging, prod, etc.). | string | n/a | yes |
 | ip\_rate\_limit | The rate limit for IPs matching with a 5 minute window. | string | `"2000"` | no |
-| ip\_set | ID of IP set of IP addresses to block. | string | n/a | yes |
+| ip\_set | ID of IP Set of IP addresses to block. | string | n/a | yes |
 | regex\_host\_allow\_pattern\_strings | The list of hosts to allow using the WAF (as found in HTTP Header). | list | n/a | yes |
 | regex\_path\_disallow\_pattern\_strings | The list of URI paths to block using the WAF. | list | n/a | yes |
 | wafregional\_rule\_f5\_id | The ID of the F5 Rule Group to use for the WAF for the ALB.  Find the id with "aws waf-regional list-subscribed-rule-groups". | string | n/a | yes |
@@ -66,4 +66,4 @@ resource "aws_wafregional_ipset" "global" {
   ip_set = aws_wafregional_ipset.global.id
 ```
 
-Use `terraform state mv` to externalaize the IP Set, e.g., `terraform state mv FOO.BAR.aws_wafregional_ipset.ips Foo.aws_wafregional_ipset.ips`.
+Use `terraform state mv` to externalize the IP Set, e.g., `terraform state mv FOO.BAR.aws_wafregional_ipset.ips Foo.aws_wafregional_ipset.ips`.
