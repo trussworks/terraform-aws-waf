@@ -24,7 +24,6 @@
  *   regex_host_allow_pattern_strings    = "${var.waf_regex_host_allow_pattern_strings}"
  *   regex_path_disallow_pattern_strings = "${var.waf_regex_path_disallow_pattern_strings}"
  *   wafregional_rule_f5_id              = "${var.wafregional_rule_id}"
- ule_id
  *   web_acl_metric_name                 = "wafAppHelloWorld"
  *   web_acl_name                        = "app-hello-world"
  * }
@@ -194,7 +193,7 @@ resource "aws_wafregional_web_acl" "wafacl" {
 }
 
 resource "aws_wafregional_web_acl_association" "main" {
-  count        = var.associate_alb > 0 ? 1 : 0
+  count        = var.associate_alb ? 1 : 0
   resource_arn = "${var.alb_arn}"
   web_acl_id   = "${aws_wafregional_web_acl.wafacl.id}"
 }
