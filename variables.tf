@@ -1,7 +1,7 @@
 variable "associate_alb" {
   description = "Whether to associate an Application Load Balancer (ALB) with an Web Application Firewall (WAF) Access Control List (ACL)."
+  type        = bool
   default     = false
-  type        = "string"
 }
 
 variable "alb_arn" {

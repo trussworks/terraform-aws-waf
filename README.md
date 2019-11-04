@@ -40,7 +40,7 @@ module "waf" {
 | Name | Description | Type | Default | Required |
 |------|-------------|:----:|:-----:|:-----:|
 | alb\_arn | ARN of the Application Load Balancer (ALB) to be associated with the Web Application Firewall (WAF) Access Control List (ACL). | string | n/a | yes |
-| associate\_alb | Whether to associate an Application Load Balancer (ALB) with an Web Application Firewall (WAF) Access Control List (ACL). | string | `"false"` | no |
+| associate\_alb | Whether to associate an Application Load Balancer (ALB) with an Web Application Firewall (WAF) Access Control List (ACL). | bool | `"false"` | no |
 | ip\_rate\_limit | The rate limit for IPs matching with a 5 minute window. | number | `"2000"` | no |
 | ip\_sets | List of sets of IP addresses to block. | list | `[]` | no |
 | regex\_host\_allow\_pattern\_strings | The list of hosts to allow using the WAF (as found in HTTP Header). | list | n/a | yes |
