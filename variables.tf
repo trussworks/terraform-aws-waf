@@ -17,12 +17,12 @@ variable "wafregional_rule_f5_id" {
 
 variable "regex_path_disallow_pattern_strings" {
   description = "The list of URI paths to block using the WAF."
-  type        = list
+  type        = list(string)
 }
 
 variable "regex_host_allow_pattern_strings" {
   description = "The list of hosts to allow using the WAF (as found in HTTP Header)."
-  type        = list
+  type        = list(string)
 }
 
 variable "ip_rate_limit" {
@@ -33,7 +33,7 @@ variable "ip_rate_limit" {
 
 variable "ip_sets" {
   description = "List of sets of IP addresses to block."
-  type        = list
+  type        = list(string)
   default     = []
 }
 

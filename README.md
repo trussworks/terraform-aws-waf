@@ -25,7 +25,7 @@ module "waf" {
   alb_arn                             = "${module.alb_web_containers.alb_arn}"
   associate_alb                       = true
   ip_rate_limit                       = 2000
-  ip_sets                             = list(aws_wafregional_ipset.global.id)
+  ip_sets                             = [aws_wafregional_ipset.global.id]
   regex_host_allow_pattern_strings    = var.waf_regex_host_allow_pattern_strings
   regex_path_disallow_pattern_strings = var.waf_regex_path_disallow_pattern_strings
   wafregional_rule_f5_id              = var.wafregional_rule_id
@@ -42,9 +42,9 @@ module "waf" {
 | alb\_arn | ARN of the Application Load Balancer (ALB) to be associated with the Web Application Firewall (WAF) Access Control List (ACL). | string | n/a | yes |
 | associate\_alb | Whether to associate an Application Load Balancer (ALB) with an Web Application Firewall (WAF) Access Control List (ACL). | bool | `"false"` | no |
 | ip\_rate\_limit | The rate limit for IPs matching with a 5 minute window. | number | `"2000"` | no |
-| ip\_sets | List of sets of IP addresses to block. | list | `[]` | no |
-| regex\_host\_allow\_pattern\_strings | The list of hosts to allow using the WAF (as found in HTTP Header). | list | n/a | yes |
-| regex\_path\_disallow\_pattern\_strings | The list of URI paths to block using the WAF. | list | n/a | yes |
+| ip\_sets | List of sets of IP addresses to block. | list(string) | `[]` | no |
+| regex\_host\_allow\_pattern\_strings | The list of hosts to allow using the WAF (as found in HTTP Header). | list(string) | n/a | yes |
+| regex\_path\_disallow\_pattern\_strings | The list of URI paths to block using the WAF. | list(string) | n/a | yes |
 | wafregional\_rule\_f5\_id | The ID of the F5 Rule Group to use for the WAF for the ALB.  Find the id with "aws waf-regional list-subscribed-rule-groups". | string | `""` | no |
 | web\_acl\_metric\_name | Metric name of the Web ACL | string | n/a | yes |
 | web\_acl\_name | Name of the Web ACL | string | n/a | yes |
@@ -79,6 +79,6 @@ Use `terraform state mv` to externalize the IP Set, e.g., `terraform state mv FO
 
 Version `2.0.0` removes the `environment` variable and adds `web_acl_metric_name` and `web_acl_name` variables to provide more control over naming.  AWS WAF rules will be prefixed by the `web_acl_name` of their associated Web ACL to provide for easy visual sorting.
 
-Version `2.0.0` replaces the `ip_set` variable with a `ip_sets` list variable, which accepts a list of `aws_wafregional_ipset` ids.  This variable allows the Web ACL to pull from multiple lists of blocked ip addresses, such that you can combine a global blocked list, and application-specific lists.  For example: `ip_sets = list(resource.aws_wafregional_ipset.global.id, resource.aws_wafregional_ipset.helloworld.id)`.
+Version `2.0.0` replaces the `ip_set` variable with a `ip_sets` list variable, which accepts a list of `aws_wafregional_ipset` ids.  This variable allows the Web ACL to pull from multiple lists of blocked ip addresses, such that you can combine a global blocked list, and application-specific lists.  For example: `ip_sets = [resource.aws_wafregional_ipset.global.id, resource.aws_wafregional_ipset.helloworld.id]`.
 
-During the initial upgrade to `2.0.0`, and if you add additional dynamic rules, you'll need to delete your web ACLs, as terraform cannot properly handle peer dependencies between Rules and Web ACLs.  For convenience, you can use the `delete-web-acl` script in the scripts folder.  For example: `scripts/delete-web-acl WEB_ACL_ID`.  Once the Web ACL is deleted use terraform apply to recreate the Web ACL and associate with your resources as you had before.  Deleting a Web ACL does not delete any associated resources, such as Application Load Balancers; however, it will lead the resources temporarily unprotected.
+During the initial upgrade to `2.0.0`, and if you add additional dynamic rules, you'll need to delete your web ACLs, as terraform cannot properly handle peer dependencies between Rules and Web ACLs.  For convenience, you can use the `delete-web-acl` script in the scripts folder.  For example: `scripts/delete-web-acl WEB_ACL_ID`.  Once the Web ACL is deleted use terraform apply to recreate the Web ACL and associate with your resources as you had before.  Deleting a Web ACL does not delete any associated resources, such as Application Load Balancers; however, it will leave the resources temporarily unprotected.

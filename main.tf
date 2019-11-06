@@ -57,7 +57,7 @@ resource "aws_wafregional_rate_based_rule" "ipratelimit" {
 
 resource "aws_wafregional_regex_pattern_set" "regex_uri" {
   name                  = format("%s-regex-uri", var.web_acl_name)
-  regex_pattern_strings = "${var.regex_path_disallow_pattern_strings}"
+  regex_pattern_strings = var.regex_path_disallow_pattern_strings
 }
 
 resource "aws_wafregional_regex_match_set" "regex_uri" {
@@ -90,7 +90,7 @@ resource "aws_wafregional_rule" "regex_uri" {
 
 resource "aws_wafregional_regex_pattern_set" "regex_host" {
   name                  = format("waf-%s-regex-host", var.web_acl_name)
-  regex_pattern_strings = "${var.regex_host_allow_pattern_strings}"
+  regex_pattern_strings = var.regex_host_allow_pattern_strings
 }
 
 resource "aws_wafregional_regex_match_set" "regex_host" {
@@ -154,7 +154,7 @@ resource "aws_wafregional_web_acl" "wafacl" {
   }
 
   dynamic "rule" {
-    for_each = length(var.wafregional_rule_f5_id) > 0 ? list(var.wafregional_rule_f5_id) : []
+    for_each = length(var.wafregional_rule_f5_id) > 0 ? [var.wafregional_rule_f5_id] : []
     content {
       type     = "GROUP"
       rule_id  = rule.value
