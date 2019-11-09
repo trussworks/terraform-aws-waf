@@ -20,15 +20,16 @@ variable "regex_path_disallow_pattern_strings" {
   type        = list(string)
 }
 
-variable "regex_host_allow_pattern_strings" {
-  description = "The list of hosts to allow using the WAF (as found in HTTP Header)."
-  type        = list(string)
+variable "rate_based_rules" {
+  description = "List of WAF Rate-based rules."
+  type        = "list"
+  default     = []
 }
 
-variable "ip_rate_limit" {
-  description = "The rate limit for IPs matching with a 5 minute window."
-  type        = number
-  default     = 2000
+variable "rules" {
+  description = "List of WAF rules."
+  type        = "list"
+  default     = []
 }
 
 variable "ip_sets" {
