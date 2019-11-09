@@ -44,7 +44,7 @@ module "waf" {
 | ip\_sets | List of sets of IP addresses to block. | list(string) | `[]` | no |
 | rate\_based\_rules | List of WAF Rate-based rules. | list | `[]` | no |
 | regex\_path\_disallow\_pattern\_strings | The list of URI paths to block using the WAF. | list(string) | n/a | yes |
-| regex\_pattern\_set\_host | The id of the aws_wafregional_regex_pattern_set to be matched with the HTTP host header. | string | `""` | no |
+| rules | List of WAF rules. | list | `[]` | no |
 | wafregional\_rule\_f5\_id | The ID of the F5 Rule Group to use for the WAF for the ALB.  Find the id with "aws waf-regional list-subscribed-rule-groups". | string | `""` | no |
 | web\_acl\_metric\_name | Metric name of the Web ACL | string | n/a | yes |
 | web\_acl\_name | Name of the Web ACL | string | n/a | yes |
