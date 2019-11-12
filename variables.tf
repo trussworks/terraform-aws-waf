@@ -20,6 +20,11 @@ variable "regex_path_disallow_pattern_strings" {
   type        = list(string)
 }
 
+variable "allowed_hosts" {
+  description = "The list of allowed host names as specified in HOST header."
+  type        = list(string)
+}
+
 variable "rate_based_rules" {
   description = "List of WAF Rate-based rules."
   type        = "list"

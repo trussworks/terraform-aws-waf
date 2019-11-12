@@ -47,20 +47,56 @@ resource "aws_wafregional_rule" "ips" {
   }
 }
 
-resource "aws_wafregional_regex_pattern_set" "regex_uri" {
-  name                  = format("%s-regex-uri", var.web_acl_name)
+resource "aws_wafregional_byte_match_set" "allowed_hosts" {
+  name = format("%s-allowed-hosts", var.web_acl_name)
+
+  dynamic "byte_match_tuples" {
+    for_each = var.allowed_hosts
+    content {
+      field_to_match {
+        type = "HEADER"
+        data = "Host"
+      }
+
+      target_string = byte_match_tuples.value
+
+      # See ByteMatchTuple for possible variable options.
+      # See https://docs.aws.amazon.com/waf/latest/APIReference/API_ByteMatchTuple.html#WAF-Type-ByteMatchTuple-PositionalConstraint
+      positional_constraint = "EXACTLY"
+
+      # Use COMPRESS_WHITE_SPACE to prevent sneaking around regex filter with
+      # extra or non-standard whitespace
+      # See https://docs.aws.amazon.com/sdk-for-go/api/service/waf/#RegexMatchTuple
+      text_transformation = "COMPRESS_WHITE_SPACE"
+    }
+  }
+}
+
+resource "aws_wafregional_rule" "allowed_hosts" {
+  name        = format("%s-allowed-hosts", var.web_acl_name)
+  metric_name = format("%sAllowedHosts", var.web_acl_metric_name)
+
+  predicate {
+    type    = "ByteMatch"
+    data_id = aws_wafregional_byte_match_set.allowed_hosts.id
+    negated = true
+  }
+}
+
+resource "aws_wafregional_regex_pattern_set" "blocked_uris" {
+  name                  = format("%s-blocked-uris", var.web_acl_name)
   regex_pattern_strings = var.regex_path_disallow_pattern_strings
 }
 
-resource "aws_wafregional_regex_match_set" "regex_uri" {
-  name = format("%s-regex-uri", var.web_acl_name)
+resource "aws_wafregional_regex_match_set" "blocked_uris" {
+  name = format("%s-blocked-uris", var.web_acl_name)
 
   regex_match_tuple {
     field_to_match {
       type = "URI"
     }
 
-    regex_pattern_set_id = "${aws_wafregional_regex_pattern_set.regex_uri.id}"
+    regex_pattern_set_id = aws_wafregional_regex_pattern_set.blocked_uris.id
 
     # Use COMPRESS_WHITE_SPACE to prevent sneaking around regex filter with
     # extra or non-standard whitespace
@@ -69,13 +105,13 @@ resource "aws_wafregional_regex_match_set" "regex_uri" {
   }
 }
 
-resource "aws_wafregional_rule" "regex_uri" {
-  name        = format("%s-regex-uri", var.web_acl_name)
-  metric_name = format("%sRegexUri", var.web_acl_metric_name)
+resource "aws_wafregional_rule" "blocked_uris" {
+  name        = format("%s-blocked-uris", var.web_acl_name)
+  metric_name = format("%sBlockedUris", var.web_acl_metric_name)
 
   predicate {
     type    = "RegexMatch"
-    data_id = "${aws_wafregional_regex_match_set.regex_uri.id}"
+    data_id = aws_wafregional_regex_match_set.blocked_uris.id
     negated = false
   }
 }
@@ -101,12 +137,32 @@ resource "aws_wafregional_web_acl" "wafacl" {
     }
   }
 
+  rule {
+    type     = "REGULAR"
+    rule_id  = aws_wafregional_rule.allowed_hosts.id
+    priority = 1 + length(aws_wafregional_rule.ips.*.id)
+
+    action {
+      type = "BLOCK"
+    }
+  }
+
+  rule {
+    type     = "REGULAR"
+    rule_id  = aws_wafregional_rule.blocked_uris.id
+    priority = 1 + length(aws_wafregional_rule.ips.*.id) + 1
+
+    action {
+      type = "BLOCK"
+    }
+  }
+
   dynamic "rule" {
     for_each = var.rate_based_rules
     content {
       type     = "RATE_BASED"
       rule_id  = rule.value
-      priority = 1 + length(aws_wafregional_rule.ips.*.id) + rule.key
+      priority = 1 + length(aws_wafregional_rule.ips.*.id) + 1 + 1 + rule.key
 
       action {
         type = "BLOCK"
@@ -119,7 +175,7 @@ resource "aws_wafregional_web_acl" "wafacl" {
     content {
       type     = "GROUP"
       rule_id  = rule.value
-      priority = 1 + length(aws_wafregional_rule.ips.*.id) + length(var.rate_based_rules) + rule.key
+      priority = 1 + length(aws_wafregional_rule.ips.*.id) + 1 + 1 + length(var.rate_based_rules) + rule.key
 
       override_action {
         type = "NONE"
@@ -132,7 +188,7 @@ resource "aws_wafregional_web_acl" "wafacl" {
     content {
       type     = "REGULAR"
       rule_id  = rule.value
-      priority = 1 + length(aws_wafregional_rule.ips.*.id) + length(var.rate_based_rules) + (length(var.wafregional_rule_f5_id) > 0 ? 1 : 0) + rule.key
+      priority = 1 + length(aws_wafregional_rule.ips.*.id) + 1 + 1 + length(var.rate_based_rules) + (length(var.wafregional_rule_f5_id) > 0 ? 1 : 0) + rule.key
 
       action {
         type = "BLOCK"

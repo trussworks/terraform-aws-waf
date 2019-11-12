@@ -40,6 +40,7 @@ module "waf" {
 | Name | Description | Type | Default | Required |
 |------|-------------|:----:|:-----:|:-----:|
 | alb\_arn | ARN of the Application Load Balancer (ALB) to be associated with the Web Application Firewall (WAF) Access Control List (ACL). | string | n/a | yes |
+| allowed\_hosts | The list of allowed host names as specified in HOST header. | list(string) | n/a | yes |
 | associate\_alb | Whether to associate an Application Load Balancer (ALB) with an Web Application Firewall (WAF) Access Control List (ACL). | bool | `"false"` | no |
 | ip\_sets | List of sets of IP addresses to block. | list(string) | `[]` | no |
 | rate\_based\_rules | List of WAF Rate-based rules. | list | `[]` | no |
@@ -99,40 +100,6 @@ resource "aws_wafregional_rate_based_rule" "ipratelimit" {
 }
 ```
 
-Use `terraform state mv` to externalize the IP Set, e.g., `terraform state mv FOO.BAR.aws_wafregional_rate_based_rule.ipratelimit Foo.aws_wafregional_rate_based_rule.ipratelimit`.
+Use `terraform state mv` to externalize the rate limit rule, e.g., `terraform state mv FOO.BAR.aws_wafregional_rate_based_rule.ipratelimit Foo.aws_wafregional_rate_based_rule.ipratelimit`.
 
-```hcl
-resource "aws_wafregional_regex_pattern_set" "host" {
-  name                  = "app-global-host"
-  regex_pattern_strings = var.waf_regex_host_allow_pattern_strings
-}
-
-resource "aws_wafregional_regex_match_set" "host" {
-  name = "app-global-regex-host"
-
-  regex_match_tuple {
-    field_to_match {
-      type = "HEADER"
-      data = "Host"
-    }
-
-    regex_pattern_set_id = aws_wafregional_regex_pattern_set.host.id
-
-    # Use COMPRESS_WHITE_SPACE to prevent sneaking around regex filter with
-    # extra or non-standard whitespace
-    # See https://docs.aws.amazon.com/sdk-for-go/api/service/waf/#RegexMatchTuple
-    text_transformation = "COMPRESS_WHITE_SPACE"
-  }
-}
-
-resource "aws_wafregional_rule" "regex_host" {
-  name        = "app-global-regex-host"
-  metric_name = "wafAppGlobalRegexHost"
-
-  predicate {
-    type    = "RegexMatch"
-    data_id = aws_wafregional_regex_match_set.host.id
-    negated = true
-  }
-}
-```
+Additionally, version `2.1.0` removes the `regex_host_allow_pattern_strings` variable and replaces it with a `allowed_hosts` variable.  That variable now takes a list of fully qualified domain names rather than regex strings.  If you ALB supports multiple domain names, each domain name will need to be added to the list.
