@@ -9,20 +9,20 @@ variable "alb_arn" {
   type        = string
 }
 
+variable "allowed_hosts" {
+  description = "The list of allowed host names as specified in HOST header."
+  type        = list(string)
+}
+
+variable "blocked_path_prefixes" {
+  description = "The list of URI path prefixes to block using the WAF."
+  type        = list(string)
+}
+
 variable "wafregional_rule_f5_id" {
   description = "The ID of the F5 Rule Group to use for the WAF for the ALB.  Find the id with \"aws waf-regional list-subscribed-rule-groups\"."
   type        = string
   default     = ""
-}
-
-variable "regex_path_disallow_pattern_strings" {
-  description = "The list of URI paths to block using the WAF."
-  type        = list(string)
-}
-
-variable "allowed_hosts" {
-  description = "The list of allowed host names as specified in HOST header."
-  type        = list(string)
 }
 
 variable "rate_based_rules" {

@@ -53,9 +53,12 @@ resource "aws_wafregional_byte_match_set" "allowed_hosts" {
   dynamic "byte_match_tuples" {
     for_each = var.allowed_hosts
     content {
+
+      # Even though the AWS Console web UI suggests a capitalized "host" data,
+      # the data should be lower case as the AWS API will silently lowercase anyway.
       field_to_match {
         type = "HEADER"
-        data = "Host"
+        data = "host"
       }
 
       target_string = byte_match_tuples.value
@@ -83,35 +86,37 @@ resource "aws_wafregional_rule" "allowed_hosts" {
   }
 }
 
-resource "aws_wafregional_regex_pattern_set" "blocked_uris" {
-  name                  = format("%s-blocked-uris", var.web_acl_name)
-  regex_pattern_strings = var.regex_path_disallow_pattern_strings
-}
+resource "aws_wafregional_byte_match_set" "blocked_path_prefixes" {
+  name = format("%s-blocked-path-prefixes", var.web_acl_name)
 
-resource "aws_wafregional_regex_match_set" "blocked_uris" {
-  name = format("%s-blocked-uris", var.web_acl_name)
+  dynamic "byte_match_tuples" {
+    for_each = var.blocked_path_prefixes
+    content {
+      field_to_match {
+        type = "URI"
+      }
 
-  regex_match_tuple {
-    field_to_match {
-      type = "URI"
+      target_string = byte_match_tuples.value
+
+      # See ByteMatchTuple for possible variable options.
+      # See https://docs.aws.amazon.com/waf/latest/APIReference/API_ByteMatchTuple.html#WAF-Type-ByteMatchTuple-PositionalConstraint
+      positional_constraint = "STARTS_WITH"
+
+      # Use COMPRESS_WHITE_SPACE to prevent sneaking around regex filter with
+      # extra or non-standard whitespace
+      # See https://docs.aws.amazon.com/sdk-for-go/api/service/waf/#RegexMatchTuple
+      text_transformation = "COMPRESS_WHITE_SPACE"
     }
-
-    regex_pattern_set_id = aws_wafregional_regex_pattern_set.blocked_uris.id
-
-    # Use COMPRESS_WHITE_SPACE to prevent sneaking around regex filter with
-    # extra or non-standard whitespace
-    # See https://docs.aws.amazon.com/sdk-for-go/api/service/waf/#RegexMatchTuple
-    text_transformation = "COMPRESS_WHITE_SPACE"
   }
 }
 
-resource "aws_wafregional_rule" "blocked_uris" {
-  name        = format("%s-blocked-uris", var.web_acl_name)
-  metric_name = format("%sBlockedUris", var.web_acl_metric_name)
+resource "aws_wafregional_rule" "blocked_path_prefixes" {
+  name        = format("%s-blocked-path-prefixes", var.web_acl_name)
+  metric_name = format("%sBlockedPathPrefixes", var.web_acl_metric_name)
 
   predicate {
-    type    = "RegexMatch"
-    data_id = aws_wafregional_regex_match_set.blocked_uris.id
+    type    = "ByteMatch"
+    data_id = aws_wafregional_byte_match_set.blocked_path_prefixes.id
     negated = false
   }
 }
@@ -149,7 +154,7 @@ resource "aws_wafregional_web_acl" "wafacl" {
 
   rule {
     type     = "REGULAR"
-    rule_id  = aws_wafregional_rule.blocked_uris.id
+    rule_id  = aws_wafregional_rule.blocked_path_prefixes.id
     priority = 1 + length(aws_wafregional_rule.ips.*.id) + 1
 
     action {

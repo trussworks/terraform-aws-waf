@@ -42,9 +42,9 @@ module "waf" {
 | alb\_arn | ARN of the Application Load Balancer (ALB) to be associated with the Web Application Firewall (WAF) Access Control List (ACL). | string | n/a | yes |
 | allowed\_hosts | The list of allowed host names as specified in HOST header. | list(string) | n/a | yes |
 | associate\_alb | Whether to associate an Application Load Balancer (ALB) with an Web Application Firewall (WAF) Access Control List (ACL). | bool | `"false"` | no |
+| blocked\_path\_prefixes | The list of URI path prefixes to block using the WAF. | list(string) | n/a | yes |
 | ip\_sets | List of sets of IP addresses to block. | list(string) | `[]` | no |
 | rate\_based\_rules | List of WAF Rate-based rules. | list | `[]` | no |
-| regex\_path\_disallow\_pattern\_strings | The list of URI paths to block using the WAF. | list(string) | n/a | yes |
 | rules | List of WAF rules. | list | `[]` | no |
 | wafregional\_rule\_f5\_id | The ID of the F5 Rule Group to use for the WAF for the ALB.  Find the id with "aws waf-regional list-subscribed-rule-groups". | string | `""` | no |
 | web\_acl\_metric\_name | Metric name of the Web ACL | string | n/a | yes |
