@@ -104,6 +104,6 @@ Use `terraform state mv` to externalize the rate limit rule, e.g., `terraform st
 
 Version `2.1.0` removes the `regex_host_allow_pattern_strings` variable and replaces it with a `allowed_hosts` variable.  That variable now takes a list of fully qualified domain names rather than regex strings.  If you ALB supports multiple domain names, each domain name will need to be added to the list.
 
-Version `2.1.0` removes the `regex_path_disallow_pattern_strings ` variable and replaces it with a `blocked_path_prefixes` variable.  That variable now takes a list of URI path prefixes rather than regex strings.
+Version `2.1.0` removes the `regex_path_disallow_pattern_strings` variable and replaces it with a `blocked_path_prefixes` variable.  That variable now takes a list of URI path prefixes rather than regex strings.
 
 Version `2.1.0` adds the `rules` variable which accepts a list of rule ids, which will be appended to the internally-managed rules.
