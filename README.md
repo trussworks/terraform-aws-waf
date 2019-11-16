@@ -50,7 +50,7 @@ module "waf" {
 | alb\_arn | ARN of the Application Load Balancer (ALB) to be associated with the Web Application Firewall (WAF) Access Control List (ACL). | string | n/a | yes |
 | allowed\_hosts | The list of allowed host names as specified in HOST header. | list(string) | n/a | yes |
 | associate\_alb | Whether to associate an Application Load Balancer (ALB) with an Web Application Firewall (WAF) Access Control List (ACL). | bool | `"false"` | no |
-| blocked\_path\_prefixes | The list of URI path prefixes to block using the WAF. | list(string) | n/a | yes |
+| blocked\_path\_prefixes | The list of URI path prefixes to block using the WAF. | list(string) | `[]` | no |
 | ip\_sets | List of sets of IP addresses to block. | list(string) | `[]` | no |
 | rate\_based\_rules | List of IDs of Rate-Based Rules to add to this WAF.  Only use this variable for rate-based rules.  Use the "rules" variable for regular rules. | list(string) | `[]` | no |
 | rules | List of IDs of Rules to add to this WAF.  Only use this variable for regular rules.  Use the "rate_based_rules" variable for rate-based rules. | list(string) | `[]` | no |
@@ -110,8 +110,8 @@ resource "aws_wafregional_rate_based_rule" "ipratelimit" {
 
 Use `terraform state mv` to externalize the rate limit rule, e.g., `terraform state mv FOO.BAR.aws_wafregional_rate_based_rule.ipratelimit Foo.aws_wafregional_rate_based_rule.ipratelimit`.
 
-Version `2.1.0` removes the `regex_host_allow_pattern_strings` variable and replaces it with a `allowed_hosts` variable.  That variable now takes a list of fully qualified domain names rather than regex strings.  If you ALB supports multiple domain names, each domain name will need to be added to the list.
+Version `2.1.0` removes the `regex_host_allow_pattern_strings` variable and replaces it with a required `allowed_hosts` variable.  That variable now takes a list of fully qualified domain names rather than regex strings.  If you ALB supports multiple domain names, each domain name will need to be added to the list.
 
-Version `2.1.0` removes the `regex_path_disallow_pattern_strings` variable and replaces it with a `blocked_path_prefixes` variable.  That variable now takes a list of URI path prefixes rather than regex strings.
+Version `2.1.0` removes the `regex_path_disallow_pattern_strings` variable and replaces it with an optional `blocked_path_prefixes` variable.  That variable now takes a list of URI path prefixes rather than regex strings.
 
 Version `2.1.0` adds the `rules` variable which accepts a list of rule ids, which will be appended to the internally-managed rules.

@@ -17,6 +17,7 @@ variable "associate_alb" {
 variable "blocked_path_prefixes" {
   description = "The list of URI path prefixes to block using the WAF."
   type        = list(string)
+  default     = []
 }
 
 variable "ip_sets" {
