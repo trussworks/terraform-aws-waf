@@ -68,32 +68,6 @@ module "waf" {
 
 ## Upgrade Path
 
-### 1.2.2 to 1.3.0
-
-Version `1.3.0` removes the `aws_wafregional_ipset` `ips` resource from this module and requires a `ip_set` variable that accepts the id of an externally managed `aws_wafregional_ipset`.  This allows for a common IP Set to be used by multiple Web Application Firewalls.  If your IP Set does not contain any IP addresses, then no IP addresses are blocked.  For example:
-
-```hcl
-resource "aws_wafregional_ipset" "global" {
-  name = "app-global-blocked-ips"
-
-  ip_set_descriptor {
-    type  = "IPV4"
-    value = "1.2.3.4/32"
-  }
-
-}
-```
-
-Use `terraform state mv` to externalize the IP Set, e.g., `terraform state mv FOO.BAR.aws_wafregional_ipset.ips Foo.aws_wafregional_ipset.ips`.
-
-### 1.3.0 to 2.0.0
-
-Version `2.0.0` removes the `environment` variable and adds `web_acl_metric_name` and `web_acl_name` variables to provide more control over naming.  AWS WAF rules will be prefixed by the `web_acl_name` of their associated Web ACL to provide for easy visual sorting.
-
-Version `2.0.0` replaces the `ip_set` variable with a `ip_sets` list variable, which accepts a list of `aws_wafregional_ipset` ids.  This variable allows the Web ACL to pull from multiple lists of blocked ip addresses, such that you can combine a global blocked list, and application-specific lists.  For example: `ip_sets = [resource.aws_wafregional_ipset.global.id, resource.aws_wafregional_ipset.helloworld.id]`.
-
-During the initial upgrade to `2.0.0`, and if you add additional dynamic rules, you'll need to delete your web ACLs, as terraform cannot properly handle peer dependencies between Rules and Web ACLs.  For convenience, you can use the `delete-web-acl` script in the scripts folder.  For example: `scripts/delete-web-acl WEB_ACL_ID`.  Once the Web ACL is deleted use terraform apply to recreate the Web ACL and associate with your resources as you had before.  Deleting a Web ACL does not delete any associated resources, such as Application Load Balancers; however, it will leave the resources temporarily unprotected.
-
 ### 2.0.0 to 2.1.0
 
 Version `2.1.0` removes the `ip_rate_limit` variables and replaces it with a `rate_based_rules` variable.  The new variable accepts a list of `aws_wafregional_rate_based_rule` ids.  This variables allows the Web ACL to use a global rate limit or provide custom rate limits for different paths.
@@ -115,3 +89,29 @@ Version `2.1.0` removes the `regex_host_allow_pattern_strings` variable and repl
 Version `2.1.0` removes the `regex_path_disallow_pattern_strings` variable and replaces it with an optional `blocked_path_prefixes` variable.  That variable now takes a list of URI path prefixes rather than regex strings.
 
 Version `2.1.0` adds the `rules` variable which accepts a list of rule ids, which will be appended to the internally-managed rules.
+
+### 1.3.0 to 2.0.0
+
+Version `2.0.0` removes the `environment` variable and adds `web_acl_metric_name` and `web_acl_name` variables to provide more control over naming.  AWS WAF rules will be prefixed by the `web_acl_name` of their associated Web ACL to provide for easy visual sorting.
+
+Version `2.0.0` replaces the `ip_set` variable with a `ip_sets` list variable, which accepts a list of `aws_wafregional_ipset` ids.  This variable allows the Web ACL to pull from multiple lists of blocked ip addresses, such that you can combine a global blocked list, and application-specific lists.  For example: `ip_sets = [resource.aws_wafregional_ipset.global.id, resource.aws_wafregional_ipset.helloworld.id]`.
+
+During the initial upgrade to `2.0.0`, and if you add additional dynamic rules, you'll need to delete your web ACLs, as terraform cannot properly handle peer dependencies between Rules and Web ACLs.  For convenience, you can use the `delete-web-acl` script in the scripts folder.  For example: `scripts/delete-web-acl WEB_ACL_ID`.  Once the Web ACL is deleted use terraform apply to recreate the Web ACL and associate with your resources as you had before.  Deleting a Web ACL does not delete any associated resources, such as Application Load Balancers; however, it will leave the resources temporarily unprotected.
+
+### 1.2.2 to 1.3.0
+
+Version `1.3.0` removes the `aws_wafregional_ipset` `ips` resource from this module and requires a `ip_set` variable that accepts the id of an externally managed `aws_wafregional_ipset`.  This allows for a common IP Set to be used by multiple Web Application Firewalls.  If your IP Set does not contain any IP addresses, then no IP addresses are blocked.  For example:
+
+```hcl
+resource "aws_wafregional_ipset" "global" {
+  name = "app-global-blocked-ips"
+
+  ip_set_descriptor {
+    type  = "IPV4"
+    value = "1.2.3.4/32"
+  }
+
+}
+```
+
+Use `terraform state mv` to externalize the IP Set, e.g., `terraform state mv FOO.BAR.aws_wafregional_ipset.ips Foo.aws_wafregional_ipset.ips`.
