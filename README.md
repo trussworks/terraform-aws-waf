@@ -19,15 +19,23 @@ Terraform 0.11. Pin module version to ~> 1.3.0. Submit pull-requests to terrafor
 ## Usage
 
 ```hcl
+resource "aws_wafregional_rate_based_rule" "ipratelimit" {
+  name        = "app-global-ip-rate-limit"
+  metric_name = "wafAppGlobalIpRateLimit"
+  rate_key   = "IP"
+  rate_limit = 2000
+}
+
 module "waf" {
   source = "trussworks/waf/aws"
 
-  alb_arn                             = "${module.alb_web_containers.alb_arn}"
+  alb_arn                             = module.alb_web_containers.alb_arn
   associate_alb                       = true
-  ip_sets                             = [aws_wafregional_ipset.global.id]
+  allowed_hosts                       = [var.domain_name]
+  blocked_path_prefixes               = var.blocked_path_prefixes
+  ip_sets                             = var.ip_sets
   rate_based_rules                    = [aws_wafregional_rate_based_rule.ipratelimit.id]
-  regex_host_allow_pattern_strings    = var.waf_regex_host_allow_pattern_strings
-  regex_path_disallow_pattern_strings = var.waf_regex_path_disallow_pattern_strings
+  rules                               = var.rules
   wafregional_rule_f5_id              = var.wafregional_rule_id
   web_acl_metric_name                 = "wafAppHelloWorld"
   web_acl_name                        = "app-hello-world"
@@ -44,8 +52,8 @@ module "waf" {
 | associate\_alb | Whether to associate an Application Load Balancer (ALB) with an Web Application Firewall (WAF) Access Control List (ACL). | bool | `"false"` | no |
 | blocked\_path\_prefixes | The list of URI path prefixes to block using the WAF. | list(string) | n/a | yes |
 | ip\_sets | List of sets of IP addresses to block. | list(string) | `[]` | no |
-| rate\_based\_rules | List of WAF Rate-based rules. | list | `[]` | no |
-| rules | List of WAF rules. | list | `[]` | no |
+| rate\_based\_rules | List of IDs of Rate-Based Rules to add to this WAF.  Only use this variable for rate-based rules.  Use the "rules" variable for regular rules. | list(string) | `[]` | no |
+| rules | List of IDs of Rules to add to this WAF.  Only use this variable for regular rules.  Use the "rate_based_rules" variable for rate-based rules. | list(string) | `[]` | no |
 | wafregional\_rule\_f5\_id | The ID of the F5 Rule Group to use for the WAF for the ALB.  Find the id with "aws waf-regional list-subscribed-rule-groups". | string | `""` | no |
 | web\_acl\_metric\_name | Metric name of the Web ACL | string | n/a | yes |
 | web\_acl\_name | Name of the Web ACL | string | n/a | yes |

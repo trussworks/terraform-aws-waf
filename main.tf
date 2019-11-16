@@ -14,16 +14,24 @@
  * ## Usage
  *
  * ```hcl
+ * resource "aws_wafregional_rate_based_rule" "ipratelimit" {
+ *   name        = "app-global-ip-rate-limit"
+ *   metric_name = "wafAppGlobalIpRateLimit"
+ *   rate_key   = "IP"
+ *   rate_limit = 2000
+ * }
+ *
  * module "waf" {
  *   source = "trussworks/waf/aws"
  *
- *   alb_arn                             = "${module.alb_web_containers.alb_arn}"
+ *   alb_arn                             = module.alb_web_containers.alb_arn
  *   associate_alb                       = true
- *   ip_rate_limit                       = 2000
- *   ip_sets                             = "${var.ip_sets}"
- *   regex_host_allow_pattern_strings    = "${var.waf_regex_host_allow_pattern_strings}"
- *   regex_path_disallow_pattern_strings = "${var.waf_regex_path_disallow_pattern_strings}"
- *   wafregional_rule_f5_id              = "${var.wafregional_rule_id}"
+ *   allowed_hosts                       = [var.domain_name]
+ *   blocked_path_prefixes               = var.blocked_path_prefixes
+ *   ip_sets                             = var.ip_sets
+ *   rate_based_rules                    = var.rate_based_rules
+ *   rules                               = var.rules
+ *   wafregional_rule_f5_id              = var.wafregional_rule_id
  *   web_acl_metric_name                 = "wafAppHelloWorld"
  *   web_acl_name                        = "app-hello-world"
  * }
