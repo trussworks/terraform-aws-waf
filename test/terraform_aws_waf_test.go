@@ -15,16 +15,16 @@ func TestTerraformAwsWaf(t *testing.T) {
 
 	awsRegion := "us-west-2"
 	wafName := strings.ToLower(random.UniqueId())
-	wafAclName := fmt.Sprintf("waf-%s", wafName)
-	wafAclMetricName := fmt.Sprintf("waf%s", wafName)
+	wafACLName := fmt.Sprintf("waf-%s", wafName)
+	wafACLMetricName := fmt.Sprintf("waf%s", wafName)
 	vpcAzs := aws.GetAvailabilityZones(t, awsRegion)[:2]
 
 	terraformOptions := &terraform.Options{
 
 		TerraformDir: "../examples/simple/",
 		Vars: map[string]interface{}{
-			"waf_acl_name":        wafAclName,
-			"waf_acl_metric_name": wafAclMetricName,
+			"waf_acl_name":        wafACLName,
+			"waf_acl_metric_name": wafACLMetricName,
 			"vpc_azs":             vpcAzs,
 		},
 		EnvVars: map[string]string{
