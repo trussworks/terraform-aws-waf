@@ -1,4 +1,3 @@
-
 Creates a WAF and associates it with an Application Load Balancer (ALB)
 
 Creates the following resources:
@@ -115,3 +114,27 @@ resource "aws_wafregional_ipset" "global" {
 ```
 
 Use `terraform state mv` to externalize the IP Set, e.g., `terraform state mv FOO.BAR.aws_wafregional_ipset.ips Foo.aws_wafregional_ipset.ips`.
+
+## Developer Setup
+
+Install dependencies (macOS)
+
+```shell
+brew install pre-commit go terraform terraform-docs
+```
+
+### Testing
+
+[Terratest](https://github.com/gruntwork-io/terratest) is being used for
+automated testing with this module. Tests in the `test` folder can be run
+locally by running the following command:
+
+```shell
+make test
+```
+
+Or with aws-vault:
+
+```shell
+AWS_VAULT_KEYCHAIN_NAME=<NAME> aws-vault exec <PROFILE> -- make test
+```
