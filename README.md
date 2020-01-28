@@ -42,20 +42,26 @@ module "waf" {
 ```
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+## Providers
+
+| Name | Version |
+|------|---------|
+| aws | n/a |
+
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|:----:|:-----:|:-----:|
-| alb\_arn | ARN of the Application Load Balancer \(ALB\) to be associated with the Web Application Firewall \(WAF\) Access Control List \(ACL\). | string | n/a | yes |
-| allowed\_hosts | The list of allowed host names as specified in HOST header. | list(string) | n/a | yes |
-| associate\_alb | Whether to associate an Application Load Balancer \(ALB\) with an Web Application Firewall \(WAF\) Access Control List \(ACL\). | bool | `"false"` | no |
-| blocked\_path\_prefixes | The list of URI path prefixes to block using the WAF. | list(string) | `[]` | no |
-| ip\_sets | List of sets of IP addresses to block. | list(string) | `[]` | no |
-| rate\_based\_rules | List of IDs of Rate-Based Rules to add to this WAF.  Only use this variable for rate-based rules.  Use the "rules" variable for regular rules. | list(string) | `[]` | no |
-| rules | List of IDs of Rules to add to this WAF.  Only use this variable for regular rules.  Use the "rate\_based\_rules" variable for rate-based rules. | list(string) | `[]` | no |
-| wafregional\_rule\_f5\_id | The ID of the F5 Rule Group to use for the WAF for the ALB.  Find the id with "aws waf-regional list-subscribed-rule-groups". | string | `""` | no |
-| web\_acl\_metric\_name | Metric name of the Web ACL | string | n/a | yes |
-| web\_acl\_name | Name of the Web ACL | string | n/a | yes |
+|------|-------------|------|---------|:-----:|
+| alb\_arn | ARN of the Application Load Balancer (ALB) to be associated with the Web Application Firewall (WAF) Access Control List (ACL). | `string` | n/a | yes |
+| allowed\_hosts | The list of allowed host names as specified in HOST header. | `list(string)` | n/a | yes |
+| associate\_alb | Whether to associate an Application Load Balancer (ALB) with an Web Application Firewall (WAF) Access Control List (ACL). | `bool` | `false` | no |
+| blocked\_path\_prefixes | The list of URI path prefixes to block using the WAF. | `list(string)` | `[]` | no |
+| ip\_sets | List of sets of IP addresses to block. | `list(string)` | `[]` | no |
+| rate\_based\_rules | List of IDs of Rate-Based Rules to add to this WAF.  Only use this variable for rate-based rules.  Use the "rules" variable for regular rules. | `list(string)` | `[]` | no |
+| rules | List of IDs of Rules to add to this WAF.  Only use this variable for regular rules.  Use the "rate\_based\_rules" variable for rate-based rules. | `list(string)` | `[]` | no |
+| wafregional\_rule\_f5\_id | The ID of the F5 Rule Group to use for the WAF for the ALB.  Find the id with "aws waf-regional list-subscribed-rule-groups". | `string` | `""` | no |
+| web\_acl\_metric\_name | Metric name of the Web ACL | `string` | n/a | yes |
+| web\_acl\_name | Name of the Web ACL | `string` | n/a | yes |
 
 ## Outputs
 
