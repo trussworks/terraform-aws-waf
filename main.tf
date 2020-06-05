@@ -1,4 +1,4 @@
-dresource "aws_wafregional_rule" "ips" {
+resource "aws_wafregional_rule" "ips" {
   count = length(var.ip_sets)
 
   name        = format("%s-ips-%d", var.web_acl_name, count.index)
