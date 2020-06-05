@@ -1,4 +1,4 @@
-resource "aws_wafregional_rule" "ips" {
+dresource "aws_wafregional_rule" "ips" {
   count = length(var.ip_sets)
 
   name        = format("%s-ips-%d", var.web_acl_name, count.index)
@@ -33,7 +33,7 @@ resource "aws_wafregional_byte_match_set" "allowed_hosts" {
 
       # See ByteMatchTuple for possible variable options.
       # See https://docs.aws.amazon.com/waf/latest/APIReference/API_ByteMatchTuple.html#WAF-Type-ByteMatchTuple-PositionalConstraint
-      positional_constraint = "EXACTLY"
+      positional_constraint = "STARTS_WITH"
 
       # Use COMPRESS_WHITE_SPACE to prevent sneaking around regex filter with
       # extra or non-standard whitespace
