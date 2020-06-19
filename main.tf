@@ -3,7 +3,7 @@ resource "aws_cloudformation_stack" "waf" {
   parameters = {
     ProjectName = var.project,
     EnvName     = var.env
-    WAFName     = "${var.env}-${var.project}-waf-web-acl"
+    WAFName     = "${var.project}-${var.env}-waf-web-acl"
     ALBARN      = var.alb
   }
 

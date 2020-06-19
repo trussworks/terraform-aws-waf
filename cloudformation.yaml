@@ -48,8 +48,8 @@ Resources:
       Rules:
         - Name: lbc-prod-rule-ip-whitelist
           Priority: 0
-          OverrideAction:
-            None: {}
+          Action:
+            Allow: {}
           VisibilityConfig:
             SampledRequestsEnabled: true
             CloudWatchMetricsEnabled: true
@@ -59,8 +59,8 @@ Resources:
               Arn: !GetAtt IPSetWhitelist.Arn
         - Name: lbc-prod-rule-timeOne-allow
           Priority: 1
-          OverrideAction:
-            None: {}
+          Action:
+            Allow: {}
           VisibilityConfig:
             SampledRequestsEnabled: true
             CloudWatchMetricsEnabled: true
@@ -68,13 +68,13 @@ Resources:
           Statement:
             ByteMatchStatement:
               FieldToMatch: 
-                QueryString: Json
+                QueryString: {}
               PositionalConstraint: CONTAINS
               SearchString: 
                 utm_source=TimeOne
               TextTransformations: 
                 - Priority: 0
-                  Type: None
+                  Type: NONE
         - Name: AWSManagedRulesCommonRuleSet
           Priority: 2
           OverrideAction:
