@@ -9,6 +9,21 @@ Parameters:
     ALBARN:
       Type: String
 Resources:
+  IPSetWhitelist: 
+    Type: AWS::WAFv2::IPSet
+    Properties: 
+      Addresses: 
+        - 185.170.45.38/32
+      IPAddressVersion: IPV4
+      Name: lbc-prod-ip-set-whitelist
+      Scope: REGIONAL
+      Tags: 
+        - Key: project
+          Value: 
+            Ref: ProjectName
+        - Key: env
+          Value: 
+            Ref: EnvName
   WAFWebACL:
     Type: AWS::WAFv2::WebACL
     Properties:
@@ -31,8 +46,37 @@ Resources:
         MetricName: 
           Ref: WAFName
       Rules:
-        - Name: AWSManagedRulesCommonRuleSet
+        - Name: lbc-prod-rule-ip-whitelist
           Priority: 0
+          OverrideAction:
+            None: {}
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: lbc-prod-rule-ip-whitelist
+          Statement:
+            IPSetReferenceStatement:
+              Arn: !GetAtt IPSetWhitelist.Arn
+        - Name: lbc-prod-rule-timeOne-allow
+          Priority: 1
+          OverrideAction:
+            None: {}
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: lbc-prod-rule-ip-whitelist
+          Statement:
+            ByteMatchStatement:
+              FieldToMatch: 
+                QueryString: Json
+              PositionalConstraint: CONTAINS
+              SearchString: 
+                utm_source=TimeOne
+              TextTransformations: 
+                - Priority: 0
+                  Type: None
+        - Name: AWSManagedRulesCommonRuleSet
+          Priority: 2
           OverrideAction:
             None: {}
           VisibilityConfig:
@@ -47,8 +91,10 @@ Resources:
                 - Name: SizeRestrictions_QUERYSTRING
                 - Name: SizeRestrictions_BODY
                 - Name: SizeRestrictions_URIPATH
+                - Name: GenericRFI_QUERYARGUMENTS
+                - Name: GenericRFI_BODY
         - Name: AWSManagedRulesAnonymousIpList
-          Priority: 1
+          Priority: 3
           OverrideAction:
             None: {}
           VisibilityConfig:
@@ -62,7 +108,7 @@ Resources:
               ExcludedRules:
                 - Name: HostingProviderIPList
         - Name: AWSManagedRulesAmazonIpReputationList
-          Priority: 2
+          Priority: 4
           OverrideAction:
             None: {}
           VisibilityConfig:
@@ -75,7 +121,7 @@ Resources:
               Name: AWSManagedRulesAmazonIpReputationList
               ExcludedRules: []
         - Name: AWSManagedRulesKnownBadInputsRuleSet
-          Priority: 3
+          Priority: 5
           OverrideAction:
             None: {}
           VisibilityConfig:
@@ -88,7 +134,7 @@ Resources:
               Name: AWSManagedRulesKnownBadInputsRuleSet
               ExcludedRules: []
         - Name: AWSManagedRulesPHPRuleSet
-          Priority: 4
+          Priority: 6
           OverrideAction:
             None: {}
           VisibilityConfig:
@@ -101,7 +147,7 @@ Resources:
               Name: AWSManagedRulesPHPRuleSet
               ExcludedRules: []
         - Name: AWSManagedRulesLinuxRuleSet
-          Priority: 5
+          Priority: 7
           OverrideAction:
             None: {}
           VisibilityConfig:
@@ -114,7 +160,7 @@ Resources:
               Name: AWSManagedRulesLinuxRuleSet
               ExcludedRules: []
         - Name: AWSManagedRulesWordPressRuleSet
-          Priority: 6
+          Priority: 8
           OverrideAction:
             None: {}
           VisibilityConfig:
