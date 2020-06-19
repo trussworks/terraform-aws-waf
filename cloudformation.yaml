@@ -64,7 +64,7 @@ Resources:
           VisibilityConfig:
             SampledRequestsEnabled: true
             CloudWatchMetricsEnabled: true
-            MetricName: lbc-prod-rule-ip-whitelist
+            MetricName: lbc-prod-rule-timeOne-allow
           Statement:
             ByteMatchStatement:
               FieldToMatch: 
