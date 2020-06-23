@@ -93,6 +93,7 @@ Resources:
                 - Name: SizeRestrictions_URIPATH
                 - Name: GenericRFI_QUERYARGUMENTS
                 - Name: GenericRFI_BODY
+		- Name: CrossSiteScripting_BODY
         - Name: AWSManagedRulesAnonymousIpList
           Priority: 3
           OverrideAction:
