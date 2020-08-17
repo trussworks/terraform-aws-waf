@@ -2,4 +2,4 @@ module github.com/trussworks/terraform-aws-waf
 
 go 1.13
 
-require github.com/gruntwork-io/terratest v0.28.12
+require github.com/gruntwork-io/terratest v0.28.13
