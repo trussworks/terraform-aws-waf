@@ -42,19 +42,18 @@ module "waf" {
 ```
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
-
 ## Requirements
 
-| Name                                | Version   |
-| ----------------------------------- | --------- |
-| [terraform](#requirement_terraform) | >= 0.13.0 |
-| [aws](#requirement_aws)             | >= 3.0    |
+| Name | Version |
+|------|---------|
+| terraform | >= 0.13.0 |
+| aws | >= 3.0 |
 
 ## Providers
 
-| Name                                             | Version |
-| ------------------------------------------------ | ------- |
-| <a name="provider_aws"></a> [aws](#provider_aws) | >= 3.0  |
+| Name | Version |
+|------|---------|
+| aws | >= 3.0 |
 
 ## Modules
 
@@ -62,37 +61,36 @@ No modules.
 
 ## Resources
 
-| Name                                                                                                                                                           | Type     |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
-| [aws_wafregional_byte_match_set.allowed_hosts](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/wafregional_byte_match_set)         | resource |
+| Name | Type |
+|------|------|
+| [aws_wafregional_byte_match_set.allowed_hosts](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/wafregional_byte_match_set) | resource |
 | [aws_wafregional_byte_match_set.blocked_path_prefixes](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/wafregional_byte_match_set) | resource |
-| [aws_wafregional_rule.allowed_hosts](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/wafregional_rule)                             | resource |
-| [aws_wafregional_rule.blocked_path_prefixes](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/wafregional_rule)                     | resource |
-| [aws_wafregional_rule.ips](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/wafregional_rule)                                       | resource |
-| [aws_wafregional_web_acl.wafacl](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/wafregional_web_acl)                              | resource |
-| [aws_wafregional_web_acl_association.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/wafregional_web_acl_association)        | resource |
+| [aws_wafregional_rule.allowed_hosts](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/wafregional_rule) | resource |
+| [aws_wafregional_rule.blocked_path_prefixes](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/wafregional_rule) | resource |
+| [aws_wafregional_rule.ips](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/wafregional_rule) | resource |
+| [aws_wafregional_web_acl.wafacl](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/wafregional_web_acl) | resource |
+| [aws_wafregional_web_acl_association.main](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/wafregional_web_acl_association) | resource |
 
 ## Inputs
 
-| Name                                                                                                | Description                                                                                                                                  | Type           | Default | Required |
-| --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | ------- | :------: |
-| <a name="input_alb_arn"></a> [alb_arn](#input_alb_arn)                                              | ARN of the Application Load Balancer (ALB) to be associated with the Web Application Firewall (WAF) Access Control List (ACL).               | `string`       | n/a     |   yes    |
-| <a name="input_allowed_hosts"></a> [allowed_hosts](#input_allowed_hosts)                            | The list of allowed host names as specified in HOST header.                                                                                  | `list(string)` | n/a     |   yes    |
-| <a name="input_associate_alb"></a> [associate_alb](#input_associate_alb)                            | Whether to associate an Application Load Balancer (ALB) with an Web Application Firewall (WAF) Access Control List (ACL).                    | `bool`         | `false` |    no    |
-| <a name="input_blocked_path_prefixes"></a> [blocked_path_prefixes](#input_blocked_path_prefixes)    | The list of URI path prefixes to block using the WAF.                                                                                        | `list(string)` | `[]`    |    no    |
-| <a name="input_ip_sets"></a> [ip_sets](#input_ip_sets)                                              | List of sets of IP addresses to block.                                                                                                       | `list(string)` | `[]`    |    no    |
-| <a name="input_rate_based_rules"></a> [rate_based_rules](#input_rate_based_rules)                   | List of IDs of Rate-Based Rules to add to this WAF. Only use this variable for rate-based rules. Use the "rules" variable for regular rules. | `list(string)` | `[]`    |    no    |
-| <a name="input_rules"></a> [rules](#input_rules)                                                    | List of IDs of Rules to add to this WAF. Only use this variable for regular rules. Use the "rate_based_rules" variable for rate-based rules. | `list(string)` | `[]`    |    no    |
-| <a name="input_wafregional_rule_f5_id"></a> [wafregional_rule_f5_id](#input_wafregional_rule_f5_id) | The ID of the F5 Rule Group to use for the WAF for the ALB. Find the id with "aws waf-regional list-subscribed-rule-groups".                 | `string`       | `""`    |    no    |
-| <a name="input_web_acl_metric_name"></a> [web_acl_metric_name](#input_web_acl_metric_name)          | Metric name of the Web ACL                                                                                                                   | `string`       | n/a     |   yes    |
-| <a name="input_web_acl_name"></a> [web_acl_name](#input_web_acl_name)                               | Name of the Web ACL                                                                                                                          | `string`       | n/a     |   yes    |
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| alb\_arn | ARN of the Application Load Balancer (ALB) to be associated with the Web Application Firewall (WAF) Access Control List (ACL). | `string` | n/a | yes |
+| allowed\_hosts | The list of allowed host names as specified in HOST header. | `list(string)` | n/a | yes |
+| associate\_alb | Whether to associate an Application Load Balancer (ALB) with an Web Application Firewall (WAF) Access Control List (ACL). | `bool` | `false` | no |
+| blocked\_path\_prefixes | The list of URI path prefixes to block using the WAF. | `list(string)` | `[]` | no |
+| ip\_sets | List of sets of IP addresses to block. | `list(string)` | `[]` | no |
+| rate\_based\_rules | List of IDs of Rate-Based Rules to add to this WAF.  Only use this variable for rate-based rules.  Use the "rules" variable for regular rules. | `list(string)` | `[]` | no |
+| rules | List of IDs of Rules to add to this WAF.  Only use this variable for regular rules.  Use the "rate\_based\_rules" variable for rate-based rules. | `list(string)` | `[]` | no |
+| wafregional\_rule\_f5\_id | The ID of the F5 Rule Group to use for the WAF for the ALB.  Find the id with "aws waf-regional list-subscribed-rule-groups". | `string` | `""` | no |
+| web\_acl\_metric\_name | Metric name of the Web ACL | `string` | n/a | yes |
+| web\_acl\_name | Name of the Web ACL | `string` | n/a | yes |
 
 ## Outputs
 
-| Name                                                              | Description                        |
-| ----------------------------------------------------------------- | ---------------------------------- |
-| <a name="output_waf_acl_id"></a> [waf_acl_id](#output_waf_acl_id) | WAF ACL ID generated by the module |
-
+| Name | Description |
+|------|-------------|
+| waf\_acl\_id | WAF ACL ID generated by the module |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 
 ## Upgrade Path

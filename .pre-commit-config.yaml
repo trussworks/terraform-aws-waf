@@ -25,6 +25,8 @@ repos:
     rev: v1.76.0
     hooks:
       - id: terraform_docs
+        args:
+          - --args=--config=.terraform-docs.yml
       - id: terraform_fmt
 
   - repo: https://github.com/golangci/golangci-lint
