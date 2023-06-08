@@ -9,11 +9,6 @@ Creates the following resources:
 - Creates rule for WAF to allow requests by host (as found in HTTP Header)
 - Attaches WAF to Application Load Balancer (ALB)
 
-## Terraform Versions
-
-Terraform 0.13 and newer. Pin module version to ~> 3.X. Submit pull-requests to master branch.
-
-Terraform 0.12. Pin module version to ~> 2.X. Submit pull-requests to terraform012 branch.
 
 ## Usage
 
